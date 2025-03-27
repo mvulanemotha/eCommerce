@@ -1,7 +1,9 @@
 const express = require("express");
 const cors = require("cors");
 const morgan = require("morgan");
-require("dotenv").config();
+const verifyToken  = require("./middleware/authTokens");
+const path = require("path");
+
 
 const app = express();
 
@@ -9,9 +11,19 @@ const app = express();
 app.use(cors());
 app.use(morgan("dev"));
 app.use(express.json());
-app.use(express.urlencoded({ extended: false }));
+app.use(express.urlencoded({ extended: true }));
+app.use("/images", express.static(path.join(__dirname, "images")));
 
 // routes block
+const users = require("./routes/usersRoute");
+const auth = require("./routes/authRoute");
+const orders = require("./routes/orderRoute");
+const products = require("./routes/productRoute");
+
+app.use("/api/users", users);
+app.use("/api/auth", auth);
+app.use("/api/orders", verifyToken.verifyToken, orders);
+app.use("/api/products", verifyToken.verifyToken, products);
 
 //404 Error hangling
 app.use((req, res, next) => {

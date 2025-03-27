@@ -6,9 +6,12 @@ const prisma = new PrismaClient();
 const router = express.Router();
 
 //create User
-router.post("/", async (req, res) => {
+router.post("/register", async (req, res) => {
   try {
-    const { email, password, name } = req.body;
+
+    console.log(req.body)
+
+    const { email, password, name, role , mobile , country } = req.body;
 
     //check if the email is already taken
     const existingUser = await prisma.user.findUnique({
@@ -27,20 +30,25 @@ router.post("/", async (req, res) => {
     //create user
     const newUser = await prisma.user.create({
       data: {
-        email,
+        email: email,
         password: hashedPassword,
-        name,
-      },
-
-      select: {
-        id: true,
-        email: true,
-        createdAt: true,
+        name: name,
+        role: role,
+        mobile: mobile,
+        country: country
       },
     });
 
     // response data
-    res.status(201).json({ message: "New user created succesfully" });
+    res.status(201).json({
+      message: "New user created succesfully",
+      data: {
+        id: newUser.id,
+        email: newUser.email,
+        name: newUser.name,
+        role: newUser.role,
+      },
+    });
   } catch (error) {
     res.status(500).json({ error: error.message });
   }

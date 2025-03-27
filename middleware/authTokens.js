@@ -4,9 +4,11 @@ const jwt = require("jsonwebtoken");
 const JWT_SECRET = process.env.JWT_SECRET;
 
 const verifyToken = (req, res, next) => {
-  const token = req.headers["authorisation"]?.split(" ")[1]; // Format: 'Bearer<token>'
+  
+  const token = req.headers["authorization"]?.split(" ")[1]; // Format: 'Bearer<token>'
+
   if (!token) {
-    return rs.status(403).json({ message: "No token provided" });
+    return res.status(403).json({ message: "Access denied" });
   }
 
   // Verify the token using jwt.verify
@@ -21,4 +23,4 @@ const verifyToken = (req, res, next) => {
   });
 };
 
-module.exports = verifyToken;
+module.exports = { verifyToken };

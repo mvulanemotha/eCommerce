@@ -13,29 +13,64 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
 model User {
 
 id Int @id @default(autoincrement())
 email String @unique
 password String
 name String
+country String
+mobile String
+role UserRole @default(ADMIN)
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 orders Order[]
+
+// New relation for owned products
+products  Product[]
+
+}
+
+model Category {
+
+  id Int @id @default(autoincrement())
+  name String @unique
+  products Product[]
 
 }
 
 model Product {
 
 id Int @id @default(autoincrement())
-name String 
+name String
 description String 
 price Float
 stock Int
+images Image[]
 createdAt DateTime @default(now())
 updatedAt DateTime @updatedAt
 OrderItems OrderItem[]
+categoryId Int
+category Category @relation(fields: [categoryId] , references: [id])
 
+//a user can own a product
+userId Int?
+owner User? @relation(fields: [userId] , references: [id]) 
+
+}
+
+model Image {
+
+  id Int @id @default(autoincrement())
+  url String 
+  productId Int 
+  product Product @relation(fields: [productId] , references: [id] , onDelete: Cascade)
+  
 }
 
 model Order {
@@ -56,7 +91,7 @@ orderId Int
 productId Int
 quantity Int
 price Float
-order Order @relation(fields: [  orderId ] , references: [id])
+order Order @relation(fields: [  orderId ] , references: [id] , onDelete: Cascade)
 product Product @relation(fields : [ productId ] , references: [id])
 
 }
