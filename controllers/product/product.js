@@ -20,20 +20,19 @@ const saveNewProduct = async (req, res) => {
       return res.status(400).json({ error: "Category not found" });
     }
 
-    
-    console.log(req.user.userId)
+    console.log(req.user.userId);
     //create a new product
     const newProduct = await prisma.product.create({
       data: {
         name,
         description,
-        price : parseFloat(price),
-        stock : parseInt(stock),
+        price: parseFloat(price),
+        stock: parseInt(stock),
         categoryId: category.id,
         userId: req.user.userId,
         images: {
           create: req.files.map((file) => ({
-            url: `/images/${file.filename}`,
+            url: `${process.env.SERVER_URL}/images/${file.filename}`,
           })),
         },
       },
@@ -48,4 +47,23 @@ const saveNewProduct = async (req, res) => {
   }
 };
 
-module.exports = { saveNewProduct };
+//get all products
+const getProducts = async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      include: {
+        images: true,
+        category: true,
+      },
+    });
+  
+    res.status(200).json(products)
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//getProducts();
+
+module.exports = { saveNewProduct , getProducts };

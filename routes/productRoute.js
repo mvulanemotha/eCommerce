@@ -1,17 +1,18 @@
 const express = require("express");
 const router = express.Router();
 const { PrismaClient } = require("@prisma/client");
-const saveNewProduct = require("../controllers/product/product");
+const products = require("../controllers/product/product");
 const upload = require("../middleware/uploadMiddleware");
 const prisma = new PrismaClient();
+const verifyToken = require("../middleware/authTokens")
 
 //create product
-router.post("/create", upload.array("images", 3), async (req, res) => {
-  
+router.post("/create", verifyToken.verifyToken , upload.array("images", 3), async (req, res) => {
   //console.log(req.user.userId)
-  await saveNewProduct.saveNewProduct(req, res);
+  await products.saveNewProduct(req, res);
 });
 
+/*
 // get all products from the database
 router.get("/all", async (req, res) => {
   try {
@@ -27,9 +28,10 @@ router.get("/all", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+*/
 
 // delete a product
-router.delete("/:id", async (req, res) => {
+router.delete("/:id", verifyToken.verifyToken , async (req, res) => {
   try {
     // product
     const productId = parseInt(req.query.id);
@@ -62,12 +64,17 @@ router.delete("/:id", async (req, res) => {
       },
     });
 
-    console.log(deleteProduct);
+  
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });
   }
+});
+
+//get all products from database
+router.get("/all", async (req, res) => {
+  await products.getProducts(req, res);
 });
 
 module.exports = router;

@@ -1,20 +1,19 @@
 const { PrismaClient, OrderStatus } = require("@prisma/client");
 const prisma = new PrismaClient();
+const Orders = require("../../models/ordersSetter")
 
-const placeOrder = async (req , res) => {
+const orderInstance = new Orders()
+
+const placeOrder = async (req, res) => {
   try {
-    const  orderItems  = req.body.cartItem;
+    const orderItems = req.body.cartItem;
     const userId = req.user.userId;
 
     let totalAmount = 0;
-    
-    orderItems.forEach(el => {
-       
-       totalAmount += parseFloat(el["price"])
 
+    orderItems.forEach((el) => {
+      totalAmount += parseFloat(el["price"]);
     });
-
-    console.log(totalAmount) 
 
     // check if the user exists
     const user = await prisma.user.findUnique({
@@ -24,33 +23,37 @@ const placeOrder = async (req , res) => {
     });
 
     if (!user) {
-      return res.status(404).json({ error: "Resource Not Found" });
+      //return res.status(404).json({ error: "Resource Not Found" });
+      return "Resource Not Found";
     }
 
     //validate order items
     if (!Array.isArray(orderItems) || orderItems.length === 0) {
-      return res
+      /*return res
         .status(400)
-        .json({ error: "Order must have atleast one item" });
+        .json({ error: "Order must have atleast one item" });*/
+      return "Order must have atleast one item";
     }
 
     // check if each product exists and has enough stock
     const productUpdates = [];
     for (const item of orderItems) {
       const product = await prisma.product.findUnique({
-        where: { id: item.productId },
+        where: { id: item.id },
       });
 
       if (!product) {
-        return res
+        /*return res
           .status(400)
-          .json({ error: `Product with ID ${item.productId} not found` });
+          .json({ error: `Product with ID ${item.productId} not found` }); */
+        return `Product with ID ${item.productId} not found`;
       }
 
       if (product.stock < item.quantity) {
-        return res.status(400).json({
+        /* return res.status(400).json({
           error: `Not enough stock for product: ${product.name}. Available stock: ${product.stock}`,
-        });
+        });*/
+        return `Not enough stock for product: ${product.name}. Available stock: ${product.stock}`;
       }
 
       // Prepare stock update for later (batch processing)
@@ -68,8 +71,8 @@ const placeOrder = async (req , res) => {
         status: OrderStatus.PENDING,
         orderItems: {
           create: orderItems.map((item) => ({
-            productId: item.productId,
-            quantity: item.quantity,
+            productId: item.id,
+            quantity: item.count,
             price: item.price,
           })),
         },
@@ -78,58 +81,61 @@ const placeOrder = async (req , res) => {
       include: { orderItems: true }, // Include order items in the response
     });
 
+    //console.log(newOrder.orderItems[0].orderId);
+    //const savedOders = new  
+    orderInstance.orderId = newOrder.orderItems[0].orderId
+
+    console.log(orderInstance.orderId)
+
     //update the product stock after order is created
     for (const item of orderItems) {
       await prisma.product.update({
-        where: { id: item.productId },
+        where: { id: item.id },
         data: {
           stock: {
-            decrement: item.quantity,
+            decrement: item.count,
           },
         },
       });
     }
 
-    res.status(201).json({
+    /*res.status(201).json({
       message: "Order created successfully",
       order: newOrder,
-    });
+    });*/
+
+    return "NONE";
   } catch (error) {
     console.log(error.message);
-    res.status(500).json({ error: error.message });
+    // res.status(500).json({ error: error.message });
+    return error.message;
+  }
+};
+
+// list my orders
+const myOrders = async (userId , res) => {
+  try {
+    // Fetch the orders for a specific user
+    const orders = await prisma.order.findMany({
+      where: {
+        userId: userId, // Filter by the user ID
+      },
+      include: {
+        orderItems: {
+          include: {
+            product: true, // Include the product details for each order item
+          },
+        },
+      },
+    });
+
+
+    return res.status(200).json(orders); // Return the orders (optional if you want to use the data elsewhere)
+  } catch (error) {
+    console.error("Error fetching orders:", error.message);
+    return res.status(500).json({ error : error.message })
   }
 };
 
 
-module.exports = { placeOrder  }
-
-
-
-
-
-/*
-
- // Create an order for the user
-  const order = await prisma.order.create({
-    data: {
-      userId: user.id,
-      totalAmount: 2300.0,
-      status: "PENDING",
-      orderItems: {
-        create: [
-          {
-            productId: product1.id,
-            quantity: 1,
-            price: product1.price,
-          },
-          {
-            productId: product2.id,
-            quantity: 2,
-            price: product2.price,
-          },
-        ],
-      },
-    },
-  });
-
-*/
+module.exports = { placeOrder , myOrders , orderInstance };
