@@ -118,8 +118,33 @@ const updateproduct = async (req, res) => {
       },
     });
 
-    return res.status(200).json(updateProduct)
-     
+    return res.status(200).json(updateProduct);
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+// get searched product
+const searchedProduct = async (req, res) => {
+  try {
+
+    console.log(req.params.value)
+    const product = await prisma.product.findMany({
+      where: {
+        name: {
+          contains: req.params.value,
+          mode: "insensitive",
+        },
+      },
+      include: {
+        images: true,
+        category: true,
+        owner: true,
+      },
+    });
+
+    res.status(200).json(product);
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });
@@ -132,4 +157,5 @@ module.exports = {
   userProducts,
   getSingleProduct,
   updateproduct,
+  searchedProduct,
 };

@@ -69,4 +69,7 @@ router.get("/:id" , verifyToken.verifyToken , products.getSingleProduct )
 //update customer product
 router.put("/:id" , verifyToken.verifyToken , products.updateproduct)
 
+// get searched product
+router.get('/search/:value' , products.searchedProduct)
+
 module.exports = router;
