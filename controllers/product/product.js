@@ -56,14 +56,80 @@ const getProducts = async (req, res) => {
         category: true,
       },
     });
-  
-    res.status(200).json(products)
+
+    res.status(200).json(products);
   } catch (error) {
     console.log(error);
     res.status(500).json({ error: error.message });
   }
 };
 
-//getProducts();
+// get products for a user
+const userProducts = async (req, res) => {
+  try {
+    const products = await prisma.product.findMany({
+      where: {
+        userId: req.user.userId,
+      },
+      include: {
+        category: true,
+        images: true,
+        owner: true,
+      },
+    });
 
-module.exports = { saveNewProduct , getProducts };
+    return res.status(200).json(products);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+    console.log(error);
+  }
+};
+
+//get a product based on product id
+const getSingleProduct = async (req, res) => {
+  try {
+    const product = await prisma.product.findUnique({
+      where: {
+        id: parseInt(req.params.id),
+      },
+    });
+
+    return res.status(200).json({ product });
+  } catch (error) {
+    console.log(error);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+//update product
+const updateproduct = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { name, description, price } = req.body;
+
+    const updateProduct = await prisma.product.update({
+      where: {
+        id: parseInt(id),
+      },
+      data: {
+        name,
+        description,
+        price: parseFloat(price),
+      },
+    });
+
+    return res.status(200).json(updateProduct)
+     
+  } catch (error) {
+    console.log(error.message);
+    res.status(500).json({ error: error.message });
+  }
+};
+
+module.exports = {
+  saveNewProduct,
+  getProducts,
+  userProducts,
+  getSingleProduct,
+  updateproduct,
+};

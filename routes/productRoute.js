@@ -12,23 +12,6 @@ router.post("/create", verifyToken.verifyToken , upload.array("images", 3), asyn
   await products.saveNewProduct(req, res);
 });
 
-/*
-// get all products from the database
-router.get("/all", async (req, res) => {
-  try {
-    const product = await prisma.product.findMany({
-      include: {
-        catagory: true,
-      },
-    });
-
-    res.status(200).json(product);
-  } catch (error) {
-    //console.log(error.message);
-    res.status(500).json({ error: error.message });
-  }
-});
-*/
 
 // delete a product
 router.delete("/:id", verifyToken.verifyToken , async (req, res) => {
@@ -76,5 +59,14 @@ router.delete("/:id", verifyToken.verifyToken , async (req, res) => {
 router.get("/all", async (req, res) => {
   await products.getProducts(req, res);
 });
+
+//get all products for a specific user
+router.get("/myproducts" , verifyToken.verifyToken , products.userProducts)
+
+//get product based on id
+router.get("/:id" , verifyToken.verifyToken , products.getSingleProduct )
+
+//update customer product
+router.put("/:id" , verifyToken.verifyToken , products.updateproduct)
 
 module.exports = router;
