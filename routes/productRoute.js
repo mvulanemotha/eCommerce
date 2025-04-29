@@ -7,11 +7,10 @@ const prisma = new PrismaClient();
 const verifyToken = require("../middleware/authTokens")
 
 //create product
-router.post("/create", verifyToken.verifyToken , upload.array("images", 3), async (req, res) => {
+router.post("/create", verifyToken.verifyToken , upload.array("images", 6), async (req, res) => {
   //console.log(req.user.userId)
   await products.saveNewProduct(req, res);
 });
-
 
 // delete a product
 router.delete("/:id", verifyToken.verifyToken , async (req, res) => {

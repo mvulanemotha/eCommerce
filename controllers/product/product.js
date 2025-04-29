@@ -7,6 +7,7 @@ const saveNewProduct = async (req, res) => {
     const { name, description, price, stock, catagoryName } = req.body;
 
     //validate required fields
+    console.log(req.body);
     if (!name || !description || !price || !stock || !catagoryName) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -128,8 +129,7 @@ const updateproduct = async (req, res) => {
 // get searched product
 const searchedProduct = async (req, res) => {
   try {
-
-    console.log(req.params.value)
+    console.log(req.params.value);
     const product = await prisma.product.findMany({
       where: {
         name: {
