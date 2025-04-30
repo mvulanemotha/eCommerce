@@ -13,6 +13,10 @@ RUN apk add --no-cache \
 # Set the working directory
 WORKDIR /eCommerce
 
+RUN mkdir -p /eCommerce/public/images
+
+RUN chmod -R 777 /eCommerce/public/images
+
 # Copy package.json and package-lock.json first (for layer caching)
 COPY package*.json ./
 
