@@ -1,5 +1,6 @@
-const { PrismaClient , OrderStatus } = require("@prisma/client");
+const { PrismaClient, OrderStatus } = require("@prisma/client");
 const prisma = new PrismaClient();
+const url = process.env.FRONT_END_URL;
 
 const stripe = require("stripe")(process.env.STRIPE_SECRET_KEY);
 
@@ -19,9 +20,8 @@ const createCheckOut = async (req, res, orderId) => {
         quantity: item.count,
       })),
       mode: "payment", //One time payment
-      success_url:
-        "http://localhost:5173/paymentsuccess?session_id={CHECKOUT_SESSION_ID}",
-      cancel_url: "http://localhost:5173/paymentfailed/",
+      success_url: `${url}paymentsuccess?session_id={CHECKOUT_SESSION_ID}`,
+      cancel_url: `${url}paymentfailed/`,
     });
 
     console.log(session);
@@ -51,7 +51,7 @@ const verifyPayment = async (session_id, res) => {
 
     if (session.payment_status === "paid") {
       // select
-      console.log(session_id)
+      console.log(session_id);
       // Retrive the stripe details using sessionId
       const stripeRecord = await prisma.stripe.findUnique({
         where: { sessionId: session_id },
@@ -59,17 +59,18 @@ const verifyPayment = async (session_id, res) => {
       });
 
       if (!stripeRecord) {
-        return res.status(404).json({ status: "error", message: "Payment record not found." });
+        return res
+          .status(404)
+          .json({ status: "error", message: "Payment record not found." });
       }
 
       // update order status
       const updateOrder = await prisma.order.update({
-        where : { id : stripeRecord.orderId },
-        data : {
-          status : "PAID"
-        }
-      })
-
+        where: { id: stripeRecord.orderId },
+        data: {
+          status: "PAID",
+        },
+      });
     }
 
     if (session.payment_status === "paid") {
