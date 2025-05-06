@@ -83,6 +83,33 @@ model Order {
   user User @relation(fields: [userId] , references: [id])
   orderItems OrderItem[]
   stripe       Stripe?
+  paypal Paypal?
+  mtnMoMo MtnMoMo?
+}
+
+model Paypal {
+
+  id Int @id @default(autoincrement())
+  orderId Int @unique
+  paymentId String @unique
+  payerId String
+  status String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  order Order @relation(fields: [orderId] , references: [id] , onDelete: Cascade)  
+
+}
+
+model MtnMoMo {
+  id Int @id @default(autoincrement())
+  orderId Int @unique
+  transactionId String @unique
+  phoneNumber String 
+  status String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+   
+  order        Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 // Stripe payment details
@@ -107,13 +134,17 @@ product Product @relation(fields : [ productId ] , references: [id])
 }
 
 enum OrderStatus {
-
   PENDING
   PAID
   SHIPPED
   DELIVERED
   CANCELLED
+}
 
+enum PaymentProvider { 
+  STRIPE
+  PAYPAL
+  MTN_MOMO
 }
 
 
