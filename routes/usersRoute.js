@@ -1,15 +1,13 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { PrismaClient } = require("@prisma/client");
-
+const verifyToken = require("../middleware/authTokens")
 const prisma = new PrismaClient();
 const router = express.Router();
 
 //create User
 router.post("/register", async (req, res) => {
   try {
-
-    console.log(req.body)
 
     const { email, password, name, role , mobile , country } = req.body;
 
@@ -53,5 +51,12 @@ router.post("/register", async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+// get user details
+/*router.get("/user", verifyToken.verifyToken , async(req , res)=> {
+
+   console.log(req) 
+
+})*/
 
 module.exports = router;

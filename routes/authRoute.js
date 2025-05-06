@@ -18,13 +18,6 @@ router.post("/", async (req, res) => {
       where: {
         email: username,
       },
-      select: {
-        id: true,
-        email: true,
-        name: true,
-        role: true,
-        password: true,
-      },
     });
 
     if (!user) {
@@ -50,6 +43,9 @@ router.post("/", async (req, res) => {
         email: user.email,
         name: user.name,
         role: user.role,
+        mobile: user.mobile,
+        country: user.country,
+        registration: user.createAt,
       },
       token,
     });
@@ -61,19 +57,16 @@ router.post("/", async (req, res) => {
 
 // get user details of User if token is not expired
 router.get("/userdetails", verifyToken.verifyToken, async (req, res) => {
-  
   try {
+    const userId = req.user.userId;
 
-  const userId = req.user.userId
-  
-  const user = await prisma.user.findUnique({
-    where : {
-      id : userId
-    }
-  })
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
 
-  res.status(200).json({ id : user.id , name : user.name , role : user.role })
-
+    res.status(200).json({ id: user.id, name: user.name, role: user.role });
   } catch (error) {
     console.log(error.message);
     res.status(500).json({ error: error.message });
