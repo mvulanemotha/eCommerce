@@ -16,7 +16,7 @@ const verifyToken = (req, res, next) => {
     if (err) {
       return res.status(401).json({ message: "Expired Token" });
     }
-
+    console.log(decoded)
     //attaching the decoded user info to the request object
     req.user = decoded;
     next();

@@ -4,6 +4,7 @@ const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 const { PrismaClient } = require("@prisma/client");
 const verifyToken = require("../middleware/authTokens");
+const auth = require("../controllers/auth/auth");
 
 const prisma = new PrismaClient();
 
@@ -72,5 +73,11 @@ router.get("/userdetails", verifyToken.verifyToken, async (req, res) => {
     res.status(500).json({ error: error.message });
   }
 });
+
+//send a reset link
+router.post("/send", auth.sendResetLink);
+
+//reset password
+router.post("/reset", verifyToken.verifyToken, auth.resetpassword);
 
 module.exports = router;
