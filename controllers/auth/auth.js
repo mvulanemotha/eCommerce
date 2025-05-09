@@ -40,7 +40,7 @@ const sendResetLink = async (req, res) => {
 
     const mailOptions = {
       from: process.env.user,
-      to: process.env.user,
+      to: email,
       subject: "Reset Your Password",
       html: `<p>Click <a href="${resetLink}">here</a> to reset your password.</p>
         
@@ -61,28 +61,27 @@ const sendResetLink = async (req, res) => {
 // reset password
 const resetpassword = async (req, res) => {
   try {
-    
-    const userId = req.user.userId
+    const userId = req.user.userId;
     const { password } = req.body;
 
-    const hashedPassword = await bcrypt.hash(password , 10)
+    const hashedPassword = await bcrypt.hash(password, 10);
 
     const updated = await prisma.user.update({
-        where : {
-            id: userId
-        },
-        data : {
-            password: hashedPassword
-        }
-    })
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
 
-    console.log(updated)
-    
-
+    if (updated) {
+      return res.status(200).json({ message: "Updated Successfully" });
+    }
   } catch (error) {
     console.log(error);
     res.status(500).json({ message: error.message });
   }
 };
 
-module.exports = { sendResetLink , resetpassword };
+module.exports = { sendResetLink, resetpassword };
