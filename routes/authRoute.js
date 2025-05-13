@@ -80,4 +80,9 @@ router.post("/send", auth.sendResetLink);
 //reset password
 router.post("/reset", verifyToken.verifyToken, auth.resetpassword);
 
+//validate token
+router.get("/validate", verifyToken.verifyToken, (req, res) => {
+  res.status(200).json({ valid: true, user: req.user });
+});
+
 module.exports = router;
