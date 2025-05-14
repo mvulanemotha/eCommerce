@@ -35,6 +35,8 @@ services:
       - "${PORT}:${PORT}"
     env_file:
       - .env
+    volumes:
+      - ./public/images:/eCommerce/public/images
     #environment:
     #DATABASE_URL: "postgresql://Mkhululi:Mvulane9876543210@db:5432/ecommerce?schema=public"
     depends_on:
