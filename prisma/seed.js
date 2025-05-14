@@ -33,6 +33,13 @@ async function main() {
     { name: "Custom & Handmade" },
   ];
 
+  const existingUser = await prisma.user.findFirst(); // helps check if a database has been initilised 
+
+  if(existingUser){
+    console.log("Data seeding has occured ...")
+    return
+  }
+
   // Create categories using createMany
   await prisma.category.createMany({
     data: categories,

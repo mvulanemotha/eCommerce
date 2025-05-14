@@ -40,4 +40,4 @@ HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
 EXPOSE 8845
 
 # Run migrations and start the server
-CMD ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.js && node server.js"]
+CMD ["sh", "-c", "npx prisma migrate deploy && node prisma/seed.js || true && node server.js"]
