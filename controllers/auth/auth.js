@@ -58,7 +58,7 @@ const sendResetLink = async (req, res) => {
   }
 };
 
-// reset password
+// reset password forgotten password
 const resetpassword = async (req, res) => {
   try {
     const userId = req.user.userId;
@@ -84,4 +84,42 @@ const resetpassword = async (req, res) => {
   }
 };
 
-module.exports = { sendResetLink, resetpassword };
+//chnage a user password
+const changepass = async (req, res) => {
+  try {
+    const { currentPassword, newPassword } = req.body;
+    const userId = req.user.userId;
+    console.log(req.user);
+
+    const user = await prisma.user.findUnique({
+      where: {
+        id: userId,
+      },
+    });
+
+    //check if the passwords do match with the one in the database
+    const isMatch = await bcrypt.compare(currentPassword, user.password);
+    console.log(isMatch);
+    if (!isMatch) {
+      return res.status(403).json({ error: "Password mismatch" });
+    }
+
+    const hashedPassword = await bcrypt.hash(newPassword, 10);
+    //update database
+    const updatedUser = await prisma.user.update({
+      where: {
+        id: userId,
+      },
+      data: {
+        password: hashedPassword,
+      },
+    });
+
+    return res.status(201).json({ message: "Updated Successfully" });
+  } catch (error) {
+    console.log(error.message);
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+module.exports = { sendResetLink, resetpassword, changepass };

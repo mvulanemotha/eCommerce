@@ -85,4 +85,7 @@ router.get("/validate", verifyToken.verifyToken, (req, res) => {
   res.status(200).json({ valid: true, user: req.user });
 });
 
+//change password
+router.put("/changepass", verifyToken.verifyToken, auth.changepass);
+
 module.exports = router;
