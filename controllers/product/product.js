@@ -55,6 +55,7 @@ const getProducts = async (req, res) => {
       include: {
         images: true,
         category: true,
+        owner: true
       },
     });
 
