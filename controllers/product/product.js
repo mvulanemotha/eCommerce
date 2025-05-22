@@ -51,6 +51,9 @@ const saveNewProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany({
+      orderBy: {
+        createdAt: "desc",
+      },
       include: {
         images: true,
         category: true,
@@ -151,43 +154,7 @@ const searchedProduct = async (req, res) => {
   }
 };
 
-// delete a product
-const deleteProduct = async (req, res) => {
-  try {
-    console.log("tetetet");
-    //const productId = parseInt(req.params.id);
-    console.log(productId);
-
-    // check if there is no existing order
-    const hasOrders = await prisma.orderItem.findFirst({
-      where: {
-        productId,
-      },
-    });
-
-    console.log(hasOrders)
-
-    if (hasOrders) {
-      return res
-        .status(400)
-        .json({ error: "Cannot delete product. It has existing orders." });
-    }
-
-    //delete a product
-    await prisma.product.delete({
-      where: {
-        id: productId,
-      },
-    });
-
-    res.json({ message: "Product deleted successfully" });
-  } catch (error) {
-    res.status(500).json({ message: error.message });
-  }
-};
-
 module.exports = {
-  deleteProduct,
   saveNewProduct,
   getProducts,
   userProducts,
