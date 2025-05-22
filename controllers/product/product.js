@@ -21,7 +21,6 @@ const saveNewProduct = async (req, res) => {
       return res.status(400).json({ error: "Category not found" });
     }
 
-    console.log(req.user.userId);
     //create a new product
     const newProduct = await prisma.product.create({
       data: {
@@ -55,7 +54,7 @@ const getProducts = async (req, res) => {
       include: {
         images: true,
         category: true,
-        owner: true
+        owner: true,
       },
     });
 
@@ -152,7 +151,43 @@ const searchedProduct = async (req, res) => {
   }
 };
 
+// delete a product
+const deleteProduct = async (req, res) => {
+  try {
+    console.log("tetetet");
+    //const productId = parseInt(req.params.id);
+    console.log(productId);
+
+    // check if there is no existing order
+    const hasOrders = await prisma.orderItem.findFirst({
+      where: {
+        productId,
+      },
+    });
+
+    console.log(hasOrders)
+
+    if (hasOrders) {
+      return res
+        .status(400)
+        .json({ error: "Cannot delete product. It has existing orders." });
+    }
+
+    //delete a product
+    await prisma.product.delete({
+      where: {
+        id: productId,
+      },
+    });
+
+    res.json({ message: "Product deleted successfully" });
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
+  deleteProduct,
   saveNewProduct,
   getProducts,
   userProducts,

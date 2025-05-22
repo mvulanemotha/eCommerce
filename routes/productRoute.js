@@ -4,20 +4,26 @@ const { PrismaClient } = require("@prisma/client");
 const products = require("../controllers/product/product");
 const upload = require("../middleware/uploadMiddleware");
 const prisma = new PrismaClient();
-const verifyToken = require("../middleware/authTokens")
+const verifyToken = require("../middleware/authTokens");
 
 //create product
-router.post("/create", verifyToken.verifyToken , upload.array("images", 6), async (req, res) => {
-  //console.log(req.user.userId)
-  await products.saveNewProduct(req, res);
-});
+router.post(
+  "/create",
+  verifyToken.verifyToken,
+  upload.array("images", 6),
+  async (req, res) => {
+    //console.log(req.user.userId)
+    await products.saveNewProduct(req, res);
+  },
+);
 
 // delete a product
-router.delete("/:id", verifyToken.verifyToken , async (req, res) => {
+router.delete("/:id", verifyToken.verifyToken, async (req, res) => {
   try {
     // product
-    const productId = parseInt(req.query.id);
-    console.log(productId);
+
+    const productId = parseInt(req.params.id);
+
     //check if product exists
     const product = await prisma.product.findUnique({
       where: {
@@ -36,17 +42,16 @@ router.delete("/:id", verifyToken.verifyToken , async (req, res) => {
 
     if (relatedOrders) {
       return res.status(400).json({
-        error: "Product has oders already",
+        error: "Product has orders already",
       });
     }
 
-    const deleteProduct = await prisma.product.delete({
+    await prisma.product.delete({
       where: {
         id: productId,
       },
     });
 
-  
     res.status(200).json({ message: "Product deleted successfully" });
   } catch (error) {
     console.log(error.message);
@@ -60,15 +65,18 @@ router.get("/all", async (req, res) => {
 });
 
 //get all products for a specific user
-router.get("/myproducts" , verifyToken.verifyToken , products.userProducts)
+router.get("/myproducts", verifyToken.verifyToken, products.userProducts);
 
 //get product based on id
-router.get("/:id" , verifyToken.verifyToken , products.getSingleProduct )
+router.get("/:id", verifyToken.verifyToken, products.getSingleProduct);
 
 //update customer product
-router.put("/:id" , verifyToken.verifyToken , products.updateproduct)
+router.put("/:id", verifyToken.verifyToken, products.updateproduct);
 
 // get searched product
-router.get('/search/:value' , products.searchedProduct)
+router.get("/search/:value", products.searchedProduct);
+
+//delete a product
+//router.delete("/:id", verifyToken.verifyToken, products.deleteProduct);
 
 module.exports = router;
