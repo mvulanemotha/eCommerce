@@ -51,8 +51,11 @@ const saveNewProduct = async (req, res) => {
 const getProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany({
+      where: {
+        gt: 0, // grater than zero
+      },
       orderBy: {
-        createdAt: "desc",
+        createdAt: "desc", // get products in  descending order
       },
       include: {
         images: true,
