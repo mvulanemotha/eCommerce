@@ -52,8 +52,11 @@ const getProducts = async (req, res) => {
   try {
     const products = await prisma.product.findMany({
       where: {
-        gt: 0, // grater than zero
+        stock: {
+          gt: 0,
+        },
       },
+
       orderBy: {
         createdAt: "desc", // get products in  descending order
       },
