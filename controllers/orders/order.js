@@ -1,14 +1,14 @@
 const { PrismaClient, OrderStatus } = require("@prisma/client");
 const prisma = new PrismaClient();
-const Orders = require("../../models/ordersSetter")
+const Orders = require("../../models/ordersSetter");
 
-const orderInstance = new Orders()
+const orderInstance = new Orders();
 
 const placeOrder = async (req, res) => {
   try {
     const orderItems = req.body.cartItem;
     const userId = req.user.userId;
-
+    //console.log(orderItems);
     let totalAmount = 0;
 
     orderItems.forEach((el) => {
@@ -29,9 +29,6 @@ const placeOrder = async (req, res) => {
 
     //validate order items
     if (!Array.isArray(orderItems) || orderItems.length === 0) {
-      /*return res
-        .status(400)
-        .json({ error: "Order must have atleast one item" });*/
       return "Order must have atleast one item";
     }
 
@@ -43,16 +40,10 @@ const placeOrder = async (req, res) => {
       });
 
       if (!product) {
-        /*return res
-          .status(400)
-          .json({ error: `Product with ID ${item.productId} not found` }); */
         return `Product with ID ${item.productId} not found`;
       }
 
-      if (product.stock < item.quantity) {
-        /* return res.status(400).json({
-          error: `Not enough stock for product: ${product.name}. Available stock: ${product.stock}`,
-        });*/
+      if (product.stock < item.count) {
         return `Not enough stock for product: ${product.name}. Available stock: ${product.stock}`;
       }
 
@@ -82,13 +73,12 @@ const placeOrder = async (req, res) => {
     });
 
     //console.log(newOrder.orderItems[0].orderId);
-    //const savedOders = new  
-    orderInstance.orderId = newOrder.orderItems[0].orderId
-
-    console.log(orderInstance.orderId)
+    //const savedOders = new
+    orderInstance.orderId = newOrder.orderItems[0].orderId;
 
     //update the product stock after order is created
-    for (const item of orderItems) {
+
+    /*for (const item of orderItems) {
       await prisma.product.update({
         where: { id: item.id },
         data: {
@@ -97,12 +87,7 @@ const placeOrder = async (req, res) => {
           },
         },
       });
-    }
-
-    /*res.status(201).json({
-      message: "Order created successfully",
-      order: newOrder,
-    });*/
+    }*/
 
     return "NONE";
   } catch (error) {
@@ -113,7 +98,7 @@ const placeOrder = async (req, res) => {
 };
 
 // list my orders
-const myOrders = async (userId , res) => {
+const myOrders = async (userId, res) => {
   try {
     // Fetch the orders for a specific user
     const orders = await prisma.order.findMany({
@@ -129,13 +114,11 @@ const myOrders = async (userId , res) => {
       },
     });
 
-
     return res.status(200).json(orders); // Return the orders (optional if you want to use the data elsewhere)
   } catch (error) {
     console.error("Error fetching orders:", error.message);
-    return res.status(500).json({ error : error.message })
+    return res.status(500).json({ error: error.message });
   }
 };
 
-
-module.exports = { placeOrder , myOrders , orderInstance };
+module.exports = { placeOrder, myOrders, orderInstance };

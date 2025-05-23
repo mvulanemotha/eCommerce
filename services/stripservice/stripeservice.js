@@ -24,7 +24,7 @@ const createCheckOut = async (req, res, orderId) => {
       cancel_url: `${url}paymentfailed/`,
     });
 
-    console.log(session);
+    //console.log(session);
 
     //save session Id with orderId
     const stripeDetails = await prisma.stripe.create({
@@ -33,8 +33,6 @@ const createCheckOut = async (req, res, orderId) => {
         sessionId: session.id,
       },
     });
-
-    console.log(stripeDetails);
 
     res.json({ id: session.id });
   } catch (error) {
@@ -51,11 +49,17 @@ const verifyPayment = async (session_id, res) => {
 
     if (session.payment_status === "paid") {
       // select
-      console.log(session_id);
+      //console.log(session_id);
       // Retrive the stripe details using sessionId
       const stripeRecord = await prisma.stripe.findUnique({
         where: { sessionId: session_id },
-        include: { order: true },
+        include: {
+          order: {
+            include: {
+              orderItems: true,
+            },
+          },
+        },
       });
 
       if (!stripeRecord) {
@@ -71,6 +75,23 @@ const verifyPayment = async (session_id, res) => {
           status: "PAID",
         },
       });
+
+      const orderItems = stripeRecord.order.orderItems
+      // check if order was updated perfectly
+      if (updateOrder) {
+        for (const item of orderItems) {
+          await prisma.product.update({
+            where: {
+              id: item.productId,
+            },
+            data: {
+              stock: {
+                decrement: item.quantity,
+              },
+            },
+          });
+        }
+      }
     }
 
     if (session.payment_status === "paid") {
