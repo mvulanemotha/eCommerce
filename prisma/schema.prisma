@@ -75,6 +75,11 @@ category Category @relation(fields: [categoryId] , references: [id])
 userId Int?
 owner User? @relation(fields: [userId] , references: [id]) 
 
+//new fields product likes and views
+likes Int @default(0)
+views Int @default(0)
+
+
 }
 
 model Image {
