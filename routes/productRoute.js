@@ -70,13 +70,15 @@ router.get("/myproducts", verifyToken.verifyToken, products.userProducts);
 //get product based on id
 router.get("/:id", verifyToken.verifyToken, products.getSingleProduct);
 
-//update customer product
-router.put("/:id", verifyToken.verifyToken, products.updateproduct);
+
 
 // get searched product
 router.get("/search/:value", products.searchedProduct);
 
-//delete a product
-//router.delete("/:id", verifyToken.verifyToken, products.deleteProduct);
+// save views
+router.put("/likes", verifyToken.verifyToken, products.saveProductLike);
+
+//update customer product
+router.put("/:id", verifyToken.verifyToken, products.updateproduct);
 
 module.exports = router;

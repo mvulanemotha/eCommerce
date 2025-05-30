@@ -1,4 +1,4 @@
-const { PrismaClient } = require("@prisma/client");
+const { PrismaClient, InteractionType } = require("@prisma/client");
 const prisma = new PrismaClient();
 
 const saveNewProduct = async (req, res) => {
@@ -7,7 +7,7 @@ const saveNewProduct = async (req, res) => {
     const { name, description, price, stock, catagoryName } = req.body;
 
     //validate required fields
-    console.log(req.body);
+
     if (!name || !description || !price || !stock || !catagoryName) {
       return res.status(400).json({ error: "All fields are required" });
     }
@@ -64,6 +64,7 @@ const getProducts = async (req, res) => {
         images: true,
         category: true,
         owner: true,
+        interactions: true,
       },
     });
 
@@ -160,6 +161,55 @@ const searchedProduct = async (req, res) => {
   }
 };
 
+//saveProductLike
+const saveProductLike = async (req, res) => {
+  const { id } = req.body;
+  const userId = req.user.userId;
+
+  try {
+    await prisma.productInteraction.create({
+      data: {
+        userId,
+        productId: id,
+        type: InteractionType.LIKE,
+      },
+    });
+
+    return res.status(200).json({ message: "Like saved" });
+  } catch (error) {
+    if (error.code === "P2002") {
+      // Unique constraint failed (already liked)
+      return res.status(400).json({ error: "Product already liked" });
+    }
+    console.log(error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+};
+
+//saveProductView
+const saveProductView = async (req, res) => {
+  const { id } = req.body;
+  const userId = req.user.userId;
+
+  try {
+    await prisma.productInteraction.create({
+      data: {
+        userId,
+        productId: id,
+        type: InteractionType.VIEW,
+      },
+    });
+
+    return res.status(200).json({ message: "View saved" });
+  } catch (error) {
+    if (error.code === "P2002") {
+      return res.status(400).json({ error: "Product already Viewed" });
+    }
+    console.log(error);
+    return res.status(500).json({ error: "Something went wrong" });
+  }
+};
+
 module.exports = {
   saveNewProduct,
   getProducts,
@@ -167,4 +217,6 @@ module.exports = {
   getSingleProduct,
   updateproduct,
   searchedProduct,
+  saveProductLike,
+  saveProductView,
 };
