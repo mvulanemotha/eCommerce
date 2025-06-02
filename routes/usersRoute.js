@@ -1,15 +1,15 @@
 const express = require("express");
 const bcrypt = require("bcrypt");
 const { PrismaClient } = require("@prisma/client");
-const verifyToken = require("../middleware/authTokens")
+const verifyToken = require("../middleware/authTokens");
 const prisma = new PrismaClient();
 const router = express.Router();
+const users = require("../controllers/users/users");
 
 //create User
 router.post("/register", async (req, res) => {
   try {
-
-    const { email, password, name, role , mobile , country } = req.body;
+    const { email, password, name, role, mobile, country } = req.body;
 
     //check if the email is already taken
     const existingUser = await prisma.user.findUnique({
@@ -33,7 +33,7 @@ router.post("/register", async (req, res) => {
         name: name,
         role: role,
         mobile: mobile,
-        country: country
+        country: country,
       },
     });
 
@@ -52,5 +52,7 @@ router.post("/register", async (req, res) => {
   }
 });
 
+//update a users role to admin
+router.put("/role", verifyToken.verifyToken, users.updateUserRole);
 
 module.exports = router;
